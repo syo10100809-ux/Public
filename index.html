@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17324d">
+<title>勤務管理</title>
+<style>
+:root{--navy:#17324d;--blue:#2463a6;--pale:#eef4f9;--line:#d7e0e8;--ink:#17212b;--muted:#637384;--red:#a63232}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f9;color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;font-size:14px}
+header{background:var(--navy);color:white;padding:7px 9px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}
+h1{font-size:16px;margin:0}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.topline{display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.topline label{display:none}
+.topline label{font-size:12px;color:#e4edf5}
+input,select,button,textarea{font:inherit}
+input[type=date],select,input[type=text],input[type=time]{min-height:38px;border:1px solid #bdcad6;border-radius:8px;padding:6px 8px;background:white;color:var(--ink);max-width:100%}
+#recordDate{font-size:16px;font-weight:700}
+main{padding:12px;max-width:900px;margin:auto}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+button{border:0;border-radius:9px;padding:10px 12px;background:var(--blue);color:white;font-weight:650;cursor:pointer}
+button.secondary{background:#e3ebf3;color:#20384e}
+button.danger{background:#a63232}
+button.small{padding:7px 9px;font-size:12px}
+.status{color:var(--muted);font-size:12px;margin-left:auto;align-self:center}
+#people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.name-manager{background:white;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.name-manager>strong{display:block;margin-bottom:8px}
+.name-manager-row{display:flex;gap:7px}
+.name-manager-row input{flex:1;min-width:0}
+.name-roster{display:flex;flex-wrap:wrap;gap:6px}
+.name-count{display:inline-block;background:var(--pale);color:var(--navy);border:0;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer}\n.name-list{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin-top:7px}\n.name-list[hidden]{display:none}\n.name-list-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;box-sizing:border-box;background:#f4f7fa;border:1px solid var(--line);border-radius:7px;padding:7px 8px;font-size:12px;color:var(--ink)}
+.name-list-label{flex:1;min-width:0;padding:2px 3px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}.holiday-editor{flex-basis:100%;background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px;margin-top:5px}.holiday-editor h3{font-size:13px;margin:0 0 8px}.holiday-editor-row{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center;margin:6px 0}.holiday-editor-row input{min-width:0;width:100%}.holiday-date-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid #e6edf2}.holiday-date-item button{padding:4px 7px;font-size:10px}
+.name-delete{background:#a63232;color:white;border:0;border-radius:5px;padding:4px 6px;font-size:10px;cursor:pointer}
+.attendance-group{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.type-row{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;align-items:start}
+.type-row .field{min-width:0}
+.type-row input[type=date]{width:100%;min-width:0}
+
+.attendance-group .field{min-width:0}\n.conditional-detail{grid-column:1/-1;background:#f5f8fb;border-left:3px solid #8baed1;border-radius:5px;padding:5px 6px;margin-top:-2px}\n.conditional-detail[hidden]{display:none}\n
+.name-chip{background:var(--pale);border-radius:7px;padding:5px 8px;font-size:12px;color:var(--navy)}
+.person{background:white;border:1px solid var(--line);border-radius:13px;padding:12px;box-shadow:0 2px 5px #10203008}
+.person-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.person-head h2{font-size:17px;margin:0;flex:1}
+.person-head input{width:100%;max-width:230px;font-weight:700}
+.person-no{background:var(--pale);color:var(--navy);border-radius:7px;padding:5px 8px;font-weight:800}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{min-width:0}\n.conditional-detail{grid-column:1/-1;background:#f5f8fb;border-left:3px solid #8baed1;border-radius:5px;padding:5px 6px;margin-top:-2px}\n.conditional-detail[hidden]{display:none}\n
+.field.full{grid-column:1/-1}
+.field>label,.field-title{display:block;font-size:12px;color:#45586a;font-weight:750;margin:0 0 4px}
+.field select,.field input[type=text]{width:100%}
+.timepair{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:5px}
+.checkrow{display:flex;align-items:center;gap:9px;min-height:38px;flex-wrap:wrap}
+.checkrow label{display:flex;align-items:center;gap:5px}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--blue)}
+.inline-detail{display:grid;grid-template-columns:1fr;gap:7px;margin-top:6px}
+.inline-detail[hidden]{display:none}
+.person-foot{display:flex;justify-content:flex-end;margin-top:10px}
+.pager{display:flex;align-items:center;justify-content:center;gap:12px;margin:15px 0}
+.pager button{min-width:78px}
+#pageLabel{font-weight:800}
+.empty{background:white;border:1px dashed #b7c5d2;padding:24px;border-radius:12px;text-align:center;color:var(--muted)}
+.note{font-size:12px;color:var(--muted);line-height:1.6;margin:12px 2px}
+.saved-list{margin-top:22px;background:white;border:1px solid var(--line);border-radius:12px;padding:12px}
+.saved-list h2{font-size:16px;margin:0 0 8px}
+.saved-entry{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid #e6edf2}
+.saved-entry .date-label{font-weight:750;flex:1}
+.saved-entry small{color:var(--muted)}
+@media(min-width:720px){#people{grid-template-columns:repeat(2,minmax(0,1fr))}.person{min-width:0}}
+@media(max-width:430px){
+ body{font-size:10px} header{padding:4px 7px} h1{font-size:13px;margin-bottom:0}
+ .header-row{gap:4px} .topline{gap:4px} #recordDate{width:124px;min-width:0;font-size:11px;min-height:27px;padding:2px}
+ #loadDate{padding:5px 5px;font-size:9px;white-space:nowrap}
+ main{padding:3px} .toolbar{gap:3px;margin-bottom:3px} button{padding:5px 6px;font-size:10px}
+ .status{display:none}
+ #people{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .person{padding:3px;border-radius:7px} .person-head{gap:3px;margin-bottom:2px;flex-wrap:nowrap}
+ .person-head h2{font-size:11px} .person-head input{max-width:none;min-width:0;flex:1;font-size:10px;min-height:25px;padding:2px}
+ .person-no{padding:3px;font-size:9px} .person-head button{padding:4px;font-size:9px}
+ .fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:1px}
+ .paired-row{grid-column:1/-1;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:3px}
+ .field.full{grid-column:auto}
+ .field>label,.field-title{font-size:9px;margin-bottom:0;line-height:1}
+ input[type=date],select,input[type=text],input[type=time]{min-height:25px;padding:2px;font-size:10px;border-radius:4px}
+ .timepair{gap:2px;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+ .timepair select{min-width:0;width:100%;padding:3px 1px;font-size:11px;letter-spacing:-.3px}
+ .field:has(.timepair){grid-column:1/-1}\n 
+ .field:has(.timepair) select{font-size:12px;min-height:29px;padding:3px 2px}
+ .checkrow{gap:2px;min-height:18px;flex-wrap:nowrap} .checkrow label{gap:2px;font-size:9px;white-space:nowrap}
+ input[type=checkbox]{width:12px;height:12px;margin:0}
+ .inline-detail{gap:3px}
+ .pager{margin:5px 0;gap:6px} .pager button{min-width:52px}
+ .note{font-size:9px;margin:4px 1px} .saved-list{margin-top:7px;padding:6px} .saved-list h2{font-size:12px}
+ main>p.note{display:none}
+ .name-manager{padding:5px;margin-bottom:4px} .name-manager-row input{min-width:0}
+ .name-manager .note{display:none}
+}
+</style>
+<style>
+
+.field:has(.remarks-area){grid-column:1/-1!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;margin-top:0!important;margin-bottom:0!important;gap:1px!important}.field:has(.remarks-area)>label{margin-bottom:0!important;line-height:1.1!important}
+</style>
+<style>
+.fields .field:has(textarea.remarks-area){grid-column:1/-1!important;width:100%!important;min-width:0!important}
+textarea
+</style>
+<style>
+.person .field:has(textarea.remarks-area){grid-column:1/-1!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;position:static!important;transform:none!important}
+textarea
+</style>
+<style>
+textarea
+</style>
+<style>
+#people textarea
+</style><style>
+#people textarea.remarks-area {
+ display:block !important;
+ width:100% !important;
+ max-width:100% !important;
+ height:42px !important;
+ min-height:42px !important;
+ max-height:none !important;
+ resize:vertical !important;
+ box-sizing:border-box !important;
+ overflow-x:hidden !important;
+ overflow-y:auto !important;
+ white-space:pre-wrap !important;
+ overflow-wrap:anywhere !important;
+ word-break:normal !important;
+ font-size:10px !important;
+ line-height:13px !important;
+ padding:2px 3px !important;
+}
+</style></head>
+<body>
+<header>
+  <div class="header-row">
+    <h1>勤務管理</h1>
+    <div class="topline">
+    <input type="date" id="recordDate" aria-label="勤務日">
+    <button class="small secondary" id="loadDate">この日を開く</button>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="toolbar">
+    <button id="addPerson">＋ 人を追加</button>
+    <button class="secondary" id="saveDay">この日の内容を保存</button>
+    <button class="secondary" id="exportData">バックアップ保存</button>
+    <button class="secondary" id="importBtn">復元</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <span class="status" id="status">端末内に自動保存</span>
+  </div>
+  <div id="people"></div>
+  <div class="pager">
+    <button class="secondary" id="prevPage">‹ 前へ</button>
+    <span id="pageLabel">1 / 1 ページ</span>
+    <button class="secondary" id="nextPage">次へ ›</button>
+  </div>
+  <p class="note">1画面に4人分ずつ表示します。5人目以降は2ページ目に表示されます。入力内容はこの端末のブラウザ内に自動保存されます。機種変更や別の端末に移す場合は「バックアップ保存」を使ってください。</p>
+  <section class="saved-list">
+    <h2>保存済みの日付</h2>
+    <div id="savedDates"></div>
+  </section>
+  <section class="name-manager">
+    <strong>名前の登録</strong>
+    <div class="name-manager-row">
+      <input type="text" id="newName" placeholder="名前を入力して登録" maxlength="40">
+      <button id="registerName">名前を保存</button>
+    </div>
+    <div class="note">ここで一度登録すると、勤務記録の名前欄から次回以降も選べます。</div>
+    <div id="nameRoster" class="name-roster"></div>
+  </section>
+</main>
+<script>
+(function(){
+const TYPES=['日勤','週休','代休','祝休','祝代休','夏特','夏休','冬休'];
+const $=id=>document.getElementById(id);
+const STORAGE='workResultRecords_v1';
+let records=readStore(), currentDate=localDate(), people=[], page=0, dirty=false;
+const NAME_STORAGE='workResultNames_v1';
+const HOLIDAY_STORAGE='workResultHolidayDates_v1';
+let savedNames=readNames();
+let holidayDates=readHolidayDates();
+let editingHolidayName='';
+function readNames(){try{return JSON.parse(localStorage.getItem(NAME_STORAGE)||'[]').filter(n=>typeof n==='string')}catch(e){return []}}
+function readHolidayDates(){try{const x=JSON.parse(localStorage.getItem(HOLIDAY_STORAGE)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}}
+function writeHolidayDates(){try{localStorage.setItem(HOLIDAY_STORAGE,JSON.stringify(holidayDates));return true}catch(e){alert('代休の日付を保存できませんでした。端末の空き容量を確認してください。');return false}}
+
+function datesFor(name,key){return Array.isArray(holidayDates[name]?.[key])?holidayDates[name][key]:[]}
+// Japanese national holidays are calculated offline, so this works without internet.
+function jpHolidayName(dateStr){
+ const [y,m,d]=dateStr.split('-').map(Number);
+ const dt=new Date(y,m-1,d), dow=dt.getDay();
+ const nth=(month,n,weekday)=>{let first=new Date(y,month-1,1).getDay();return 1+((weekday-first+7)%7)+(n-1)*7};
+ const eqSpring=Math.floor(20.8431+0.242194*(y-1980)-Math.floor((y-1980)/4));
+ const eqAutumn=Math.floor(23.2488+0.242194*(y-1980)-Math.floor((y-1980)/4));
+ const fixed={
+  '1-1':'元日','2-11':'建国記念の日','2-23':'天皇誕生日','4-29':'昭和の日',
+  '5-3':'憲法記念日','5-4':'みどりの日','5-5':'こどもの日','8-11':'山の日',
+  '11-3':'文化の日','11-23':'勤労感謝の日'
+ };
+ if(m===1&&d===nth(1,2,1))return '成人の日';
+ if(m===7&&d===nth(7,3,1))return '海の日';
+ if(m===9&&d===nth(9,3,1))return '敬老の日';
+ if(m===10&&d===nth(10,2,1))return 'スポーツの日';
+ if(m===3&&d===eqSpring)return '春分の日';
+ if(m===9&&d===eqAutumn)return '秋分の日';
+ if(fixed[`${m}-${d}`])return fixed[`${m}-${d}`];
+ // Olympic-related one-off moves in 2020 and 2021
+ const oneOff={
+  '2020-7-23':'海の日','2020-7-24':'スポーツの日','2020-8-10':'山の日',
+  '2021-7-22':'海の日','2021-7-23':'スポーツの日','2021-8-8':'山の日'
+ };
+ if(oneOff[dateStr])return oneOff[dateStr];
+ // Citizens' holidays: weekday between two national holidays (2026 onward rules included)
+ const prev=new Date(y,m-1,d-1), next=new Date(y,m-1,d+1);
+ const key=x=>`${x.getMonth()+1}-${x.getDate()}`;
+ const isBaseHoliday=x=>{
+  const yy=x.getFullYear(), mm=x.getMonth()+1, dd=x.getDate(), ds=`${yy}-${String(mm).padStart(2,'0')}-${String(dd).padStart(2,'0')}`;
+  if(yy===y&&ds===dateStr)return false;
+  const fixedMap={'1-1':1,'2-11':1,'2-23':1,'4-29':1,'5-3':1,'5-4':1,'5-5':1,'8-11':1,'11-3':1,'11-23':1};
+  const nn=(mo,n,w)=>{const f=new Date(yy,mo-1,1).getDay();return 1+((w-f+7)%7)+(n-1)*7};
+  const es=Math.floor(20.8431+0.242194*(yy-1980)-Math.floor((yy-1980)/4));
+  const ea=Math.floor(23.2488+0.242194*(yy-1980)-Math.floor((yy-1980)/4));
+  return !!fixedMap[`${mm}-${dd}`]||(mm===1&&dd===nn(1,2,1))||(mm===7&&dd===nn(7,3,1))||(mm===9&&dd===nn(9,3,1))||(mm===10&&dd===nn(10,2,1))||(mm===3&&dd===es)||(mm===9&&dd===ea)||!!oneOff[ds];
+ };
+ if(dow!==0&&isBaseHoliday(prev)&&isBaseHoliday(next))return '国民の休日';
+ // Substitute holiday: Sunday national holiday shifts to next non-holiday.
+ for(let back=1;back<=7;back++){
+  const prior=new Date(y,m-1,d-back);
+  if(prior.getDay()===0&&isBaseHoliday(prior)){
+   let sub=new Date(prior);
+   do{sub.setDate(sub.getDate()+1)}while(isBaseHoliday(sub)||sub.getDay()===0);
+   if(sub.getFullYear()===y&&sub.getMonth()===m-1&&sub.getDate()===d)return '振替休日';
+  }
+ }
+ return '';
+}
+function usedDatesFor(name,key){
+ const wantedType=key==='holiday'?'祝代休':'代休';
+ const used=[];
+ Object.values(records).forEach(rec=>{
+  if(!rec||!Array.isArray(rec.people))return;
+  rec.people.forEach(person=>{
+   if(person&&person.name===name&&person.type===wantedType&&person.compensatoryDate&&!used.includes(person.compensatoryDate))used.push(person.compensatoryDate);
+  });
+ });
+ return used;
+}
+function availableDatesFor(name,key){const used=usedDatesFor(name,key);return datesFor(name,key).filter(d=>!used.includes(d))}
+function addRegisteredHolidayDate(name,key,dateStr){
+ if(!name||!dateStr)return false;
+ holidayDates[name]=holidayDates[name]||{compensatory:[],holiday:[]};
+ holidayDates[name][key]=Array.isArray(holidayDates[name][key])?holidayDates[name][key]:[];
+ if(holidayDates[name][key].includes(dateStr))return false;
+ holidayDates[name][key].push(dateStr);holidayDates[name][key].sort();
+ writeHolidayDates();return true;
+}
+function autoRegisterWorkDate(person){
+ if(!person||person.type!=='日勤'||!person.name)return;
+ const [y,m,d]=currentDate.split('-').map(Number);
+ const dow=new Date(y,m-1,d).getDay();
+ if(dow===0||dow===6)addRegisteredHolidayDate(person.name,'compensatory',currentDate);
+ if(jpHolidayName(currentDate))addRegisteredHolidayDate(person.name,'holiday',currentDate);
+}
+
+function writeNames(){try{localStorage.setItem(NAME_STORAGE,JSON.stringify(savedNames));renderNameRoster();return true}catch(e){alert('名前を保存できませんでした。端末の空き容量を確認してください。');return false}}
+function localDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function readStore(){try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')}catch(e){return {}}}
+function writeStore(){try{localStorage.setItem(STORAGE,JSON.stringify(records));$('status').textContent='保存済み ✓';dirty=false;renderSavedDates();renderNameRoster();return true}catch(e){$('status').textContent='保存できません。バックアップを確認';return false}}
+function makeTimes(step=15){let a=[];for(let m=0;m<1440;m+=step)a.push(`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`);a.push('23:59');return [...new Set(a)]}
+const times=makeTimes(15);
+function blankPerson(n){return {name:`${n}人目`,workStart:'08:30',workEnd:'17:15',type:'',compensatoryDate:'',dispatch:false,dispatchPlace:'',trip:false,tripStart:'09:00',tripEnd:'17:00',overnight:false,clockIn:null,clockOut:null,remarks:''}}
+function normalize(p,i){const q={...blankPerson(i+1),...p};if(q.type==='日勤'){if(!q.workStart)q.workStart='08:30';if(!q.workEnd)q.workEnd='17:15';}else if(!q.type){q.workStart='';q.workEnd='';}return q}
+function loadDay(date){currentDate=date;people=(records[date]?.people||[]).map(normalize);page=0;dirty=false;$('recordDate').value=date;people.forEach(autoRegisterWorkDate);render();$('status').textContent=records[date]?'保存済みデータを表示':'新しい日付';}
+function saveDay(show=true){records[currentDate]={people:people.map(p=>({...p}))};const ok=writeStore();if(show&&ok)$('status').textContent='保存しました ✓';renderSavedDates();renderNameRoster()}
+function markDirty(){dirty=true;$('status').textContent='未保存の変更あり'}
+function timeSelect(value,field,index,label){let s=document.createElement('select');s.setAttribute('aria-label',label);let empty=document.createElement('option');empty.value='';empty.textContent='--:--';s.appendChild(empty);times.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=t;s.appendChild(o)});s.value=value||'';s.addEventListener('change',()=>{people[index][field]=s.value;markDirty()});return s}
+function checkbox(label,key,p,index){
+ let wrap=document.createElement('div');wrap.className='checkrow';
+ [['有',true],['無',false]].forEach(([txt,val])=>{
+   let l=document.createElement('label'),c=document.createElement('input');
+   const caption=document.createElement('span');caption.textContent=txt;
+   c.type='checkbox';c.checked=(p[key]===null||p[key]===undefined)?false:(p[key]===val);c.setAttribute('aria-label',label+txt);
+   const updateEmphasis=()=>{
+     const active=((key==='overnight'||key==='trip')&&val===true&&p[key]===true)||((key==='clockIn'||key==='clockOut')&&val===false&&p[key]===false);
+     caption.style.color=active?'#d11f2f':'';
+     caption.style.fontWeight=active?'700':'';
+     c.style.accentColor=active?'#d11f2f':'';
+   };
+   updateEmphasis();
+   c.addEventListener('change',()=>{
+     if(key==='clockIn'||key==='clockOut'){
+       people[index][key]=c.checked?val:null;
+       markDirty();renderPeople();
+     }else{
+       people[index][key]=val;markDirty();renderPeople();
+     }
+   });
+   l.append(c,caption);wrap.append(l);
+ });
+ return wrap;
+}
+function field(label,content,full=false){let d=document.createElement('div');d.className='field'+(full?' full':'');let l=document.createElement('label');l.textContent=label;d.append(l,content);return d}
+function createPersonCard(p,i){
+ if(p.type==='日勤'){if(!p.workStart)p.workStart='08:30';if(!p.workEnd)p.workEnd='17:15';}
+ else if(!p.type){p.workStart='';p.workEnd='';}
+ const card=document.createElement('article');card.className='person';
+ const head=document.createElement('div');head.className='person-head';
+ const num=document.createElement('span');num.className='person-no';num.textContent=i+1;
+ const name=document.createElement('select');name.setAttribute('aria-label','氏名または識別名');
+ const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='名前を選択';name.append(placeholder);
+ const nameOptions=[...savedNames];if(p.name&&!nameOptions.includes(p.name))nameOptions.push(p.name);
+ nameOptions.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;name.append(o)});
+ name.value=p.name||'';name.addEventListener('change',()=>{people[i].name=name.value;autoRegisterWorkDate(people[i]);markDirty();render()});
+ const del=document.createElement('button');del.className='small danger';del.textContent='削除';del.addEventListener('click',()=>{if(confirm(`${p.name||`${i+1}人目`}をこの日から削除しますか？`)){people.splice(i,1);page=Math.min(page,Math.max(0,Math.ceil(people.length/4)-1));markDirty();render()}});head.append(num,name,del);card.append(head);
+ const fields=document.createElement('div');fields.className='fields';
+ const typeRow=document.createElement('div');typeRow.className='type-row';
+ const type=document.createElement('select');const blankType=document.createElement('option');blankType.value='';blankType.textContent='選択してください';type.append(blankType);TYPES.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=t;type.append(o)});type.value=p.type||'';
+ type.addEventListener('change',()=>{people[i].type=type.value;if(type.value==='日勤'){people[i].workStart='08:30';people[i].workEnd='17:15';autoRegisterWorkDate(people[i]);}else{people[i].workStart='';people[i].workEnd='';}markDirty();render()});
+ typeRow.append(field('勤務種別',type,false));
+ const holidayKey=p.type==='祝代休'?'holiday':'compensatory';
+ const holidayLabel=p.type==='祝代休'?'祝代休発生日':'代休発生日';
+ const compDate=document.createElement('select');compDate.setAttribute('aria-label',holidayLabel);
+ const datePlaceholder=document.createElement('option');datePlaceholder.value='';datePlaceholder.textContent='日付を選択';compDate.append(datePlaceholder);
+ let registeredDates=availableDatesFor(p.name,holidayKey);
+ const existingDate=p.compensatoryDate||'';
+ if(existingDate&&!registeredDates.includes(existingDate))registeredDates=[existingDate,...registeredDates];
+ registeredDates.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;compDate.append(o)});
+ compDate.value=existingDate;
+ compDate.addEventListener('change',()=>{people[i].compensatoryDate=compDate.value;markDirty()});
+ const compDateField=field(holidayLabel,compDate,false);compDateField.hidden=!['代休','祝代休'].includes(p.type);typeRow.append(compDateField);fields.append(typeRow);
+ let work=document.createElement('div');work.className='timepair';work.append(timeSelect(p.workStart,'workStart',i,'勤務開始'),document.createTextNode('〜'),timeSelect(p.workEnd,'workEnd',i,'勤務終了'));
+ fields.append(field('勤務時間',work,true));
+ const dispatchRow=document.createElement('div');dispatchRow.className='paired-row';
+ dispatchRow.append(field('派遣',checkbox('有り','dispatch',p,i),false));
+ const dispatchPlace=document.createElement('input');dispatchPlace.type='text';dispatchPlace.placeholder='派遣場所（任意）';dispatchPlace.value=p.dispatchPlace||'';dispatchPlace.addEventListener('change',()=>{people[i].dispatchPlace=dispatchPlace.value;markDirty()});
+ const dispatchField=field('派遣場所',dispatchPlace,false);dispatchField.classList.add('conditional-detail');dispatchField.hidden=!p.dispatch;dispatchRow.append(dispatchField);fields.append(dispatchRow);
+ const tripRow=document.createElement('div');tripRow.className='paired-row';
+ tripRow.append(field('出張',checkbox('有り','trip',p,i),false));
+ const tripTimes=document.createElement('div');tripTimes.className='timepair';tripTimes.append(timeSelect(p.tripStart,'tripStart',i,'出張開始'),document.createTextNode('〜'),timeSelect(p.tripEnd,'tripEnd',i,'出張終了'));
+ const tripField=field('出張時間',tripTimes,false);tripField.classList.add('conditional-detail');tripField.hidden=!p.trip;tripRow.append(tripField);fields.append(tripRow);
+ fields.append(field('宿直',checkbox('有り','overnight',p,i),true));
+ const attendanceGroup=document.createElement('div');
+ attendanceGroup.className='attendance-group';
+ attendanceGroup.append(
+   field('出勤時打刻',checkbox('有り','clockIn',p,i),false),
+   field('退勤時打刻',checkbox('有り','clockOut',p,i),false)
+ );
+ fields.append(attendanceGroup);
+ const remarks=document.createElement('textarea');
+ remarks.className='remarks-area';remarks.placeholder='任意でコメントを入力';remarks.value=p.remarks||'';
+ remarks.setAttribute('aria-label','備考');
+ remarks.rows=2;
+ remarks.addEventListener('input',()=>{people[i].remarks=remarks.value;markDirty()});
+ fields.append(field('備考',remarks,true));
+ card.append(fields);return card;
+}
+function renderPeople(){render()}
+function render(){const root=$('people');root.replaceChildren();const pages=Math.max(1,Math.ceil(people.length/4));page=Math.max(0,Math.min(page,pages-1));const slice=people.slice(page*4,page*4+4);if(!slice.length){const e=document.createElement('div');e.className='empty';e.textContent='まだ人が登録されていません。「＋ 人を追加」から始めてください。';root.append(e)}else slice.forEach((p,j)=>root.append(createPersonCard(p,page*4+j)));$('pageLabel').textContent=`${page+1} / ${pages} ページ（全${people.length}人）`;$('prevPage').disabled=page===0;$('nextPage').disabled=page>=pages-1;$('prevPage').style.opacity=page===0?'.45':'1';$('nextPage').style.opacity=page>=pages-1?'.45':'1';renderSavedDates()}
+function renderSavedDates(){const root=$('savedDates');if(!root)return;root.replaceChildren();const dates=Object.keys(records).filter(d=>records[d]&&Array.isArray(records[d].people)).sort((a,b)=>b.localeCompare(a));if(!dates.length){const p=document.createElement('div');p.className='note';p.textContent='保存された日付はまだありません。';root.append(p);return}dates.forEach(d=>{const row=document.createElement('div');row.className='saved-entry';const label=document.createElement('div');label.className='date-label';label.textContent=d;const small=document.createElement('small');small.textContent=`${records[d].people.length}人`;const open=document.createElement('button');open.className='small';open.textContent='開く';open.addEventListener('click',()=>loadDay(d));const del=document.createElement('button');del.className='small danger';del.textContent='削除';del.addEventListener('click',()=>{if(confirm(`${d}の保存データを削除しますか？`)){delete records[d];writeStore();if(currentDate===d){people=[];page=0;render()}renderSavedDates()}});row.append(label,small,open,del);root.append(row)})}
+$('addPerson').addEventListener('click',()=>{people.push(blankPerson(people.length+1));page=Math.floor((people.length-1)/4);markDirty();render()});
+$('saveDay').addEventListener('click',()=>saveDay(true));
+$('loadDate').addEventListener('click',()=>{if(dirty&&!confirm('この日の変更はまだ保存されていません。保存せずに別の日付を開きますか？'))return;loadDay($('recordDate').value||localDate())});
+$('recordDate').addEventListener('change',()=>{});
+$('prevPage').addEventListener('click',()=>{if(page>0){page--;render()}});
+$('nextPage').addEventListener('click',()=>{if((page+1)*4<people.length){page++;render()}});
+$('exportData').addEventListener('click',()=>{const exportRecords={...records};if(dirty)exportRecords[currentDate]={people:people.map(p=>({...p}))};const blob=new Blob([JSON.stringify({app:'勤務結果記録',version:1,records:exportRecords},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`勤務結果バックアップ_${localDate()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
+$('importBtn').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const data=JSON.parse(await f.text());const incoming=data.records||data;if(!incoming||typeof incoming!=='object')throw Error('形式');if(!confirm('バックアップを読み込みます。既存の日付と同じデータは上書きされます。続けますか？'))return;Object.keys(incoming).forEach(d=>{if(Array.isArray(incoming[d]?.people))records[d]={people:incoming[d].people.map(normalize)}});writeStore();loadDay(currentDate);alert('復元しました。')}catch(err){alert('バックアップを読み込めませんでした。JSONファイルを確認してください。')}finally{e.target.value=''}});
+function renderNameRoster(){
+ const root=$('nameRoster');if(!root)return;root.replaceChildren();
+ const summary=document.createElement('button');
+ summary.type='button';summary.className='name-count';
+ summary.textContent=savedNames.length ? `${savedNames.length}人登録済み ▾` : '登録済みの名前はありません';
+ summary.setAttribute('aria-expanded','false');
+ const list=document.createElement('div');list.className='name-list';list.hidden=true;
+ list.style.cssText='display:flex;flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:6px;width:100%;margin-top:7px';
+ const editor=document.createElement('div');editor.className='holiday-editor';editor.hidden=true;
+ function renderEditor(name){
+   editor.replaceChildren();
+   if(!name){editor.hidden=true;return}
+   editor.hidden=false;
+   const title=document.createElement('h3');title.textContent=`${name}さんの代休発生日登録`;editor.append(title);
+   const makeDateSection=(key,label)=>{
+     const heading=document.createElement('div');heading.style.fontWeight='700';heading.style.marginTop='8px';heading.textContent=label;editor.append(heading);
+     const row=document.createElement('div');row.className='holiday-editor-row';
+     const input=document.createElement('input');input.type='date';input.setAttribute('aria-label',label);
+     const add=document.createElement('button');add.type='button';add.textContent='日付を登録';add.className='small';
+     add.addEventListener('click',()=>{
+       if(!input.value){alert('日付を選択してください。');return}
+       holidayDates[name]=holidayDates[name]||{compensatory:[],holiday:[]};
+       holidayDates[name][key]=Array.isArray(holidayDates[name][key])?holidayDates[name][key]:[];
+       if(!holidayDates[name][key].includes(input.value)){holidayDates[name][key].push(input.value);holidayDates[name][key].sort();writeHolidayDates()}
+       renderEditor(name);render();
+     });
+     row.append(input,add);editor.append(row);
+     const dates=datesFor(name,key),used=usedDatesFor(name,key);
+     const count=document.createElement('div');count.className='note';count.textContent=`未取得候補：${availableDatesFor(name,key).length}日 ／ 取得済み：${used.length}日`;editor.append(count);
+     if(!dates.length){const empty=document.createElement('div');empty.className='note';empty.textContent='登録された日付はありません。';editor.append(empty)}
+     dates.forEach((date,idx)=>{
+       const item=document.createElement('div');item.className='holiday-date-item';
+       const txt=document.createElement('span');txt.textContent=date+(used.includes(date)?'（取得済み）':'');
+       const del=document.createElement('button');del.type='button';del.className='name-delete';del.textContent='削除';del.style.cssText='flex-shrink:0;margin:0';
+       del.addEventListener('click',()=>{
+         if(!confirm(`${name}さんの${label}「${date}」を削除しますか？`))return;
+         holidayDates[name][key]=datesFor(name,key).filter((_,j)=>j!==idx);writeHolidayDates();renderEditor(name);render();
+       });
+       item.append(txt,del);editor.append(item);
+     });
+   };
+   makeDateSection('compensatory','代休発生日');
+   makeDateSection('holiday','祝代休発生日');
+   const close=document.createElement('button');close.type='button';close.className='secondary';close.style.marginTop='8px';close.textContent='閉じる';close.addEventListener('click',()=>{editingHolidayName='';editor.hidden=true});
+   editor.append(close);
+ }
+ savedNames.forEach((name,i)=>{
+   const item=document.createElement('div');item.className='name-list-item';
+   item.style.cssText='display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:8px;width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid #d5dfe7;border-radius:7px;background:#f4f7fa';
+   const label=document.createElement('span');label.className='name-list-label';
+   const compCount=availableDatesFor(name,'compensatory').length;
+   const holidayCount=availableDatesFor(name,'holiday').length;
+   label.textContent=`${i+1}. ${name}（代休残${compCount}・祝代休残${holidayCount}）`;label.title='クリックして代休の日付を登録・残数を確認';
+   label.style.cssText='display:block;flex:1;min-width:0;overflow-wrap:anywhere;cursor:pointer;text-decoration:underline;text-underline-offset:2px';
+   label.addEventListener('click',()=>{editingHolidayName=name;renderEditor(name)});
+   const del=document.createElement('button');del.type='button';del.className='name-delete';del.textContent='削除';
+   del.addEventListener('click',()=>{
+     if(!confirm(`登録名「${name}」を削除しますか？\n勤務記録にすでに入力された名前は、その記録には残ります。`))return;
+     savedNames=savedNames.filter((_,idx)=>idx!==i);
+     writeNames();renderNameRoster();render();
+   });
+   item.append(label,del);list.append(item);
+ });
+ summary.addEventListener('click',()=>{
+   list.hidden=!list.hidden;
+   summary.setAttribute('aria-expanded',String(!list.hidden));
+   summary.textContent=savedNames.length ? `${savedNames.length}人登録済み ${list.hidden?'▾':'▴'}` : '登録済みの名前はありません';
+ });
+ root.append(summary,list,editor);
+ if(editingHolidayName&&savedNames.includes(editingHolidayName))renderEditor(editingHolidayName);
+}
+$('registerName').addEventListener('click',()=>{
+ const input=$('newName');const name=input.value.trim();
+ if(!name){alert('登録する名前を入力してください。');input.focus();return;}
+ if(savedNames.includes(name)){alert('その名前は登録済みです。');return;}
+ savedNames.push(name);
+ if(!writeNames())return;
+ input.value='';$('status').textContent='名前を登録しました ✓';render();
+});
+$('newName').addEventListener('keydown',e=>{if(e.key==='Enter')$('registerName').click()});
+loadDay(currentDate);
+renderNameRoster();
+})();
+</script>
+</body>
+</html>
